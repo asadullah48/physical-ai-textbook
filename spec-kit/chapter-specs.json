@@ -1,0 +1,18 @@
+{
+  "chapters": [
+    {"id": "module0-hardware", "title": "Hardware Requirements & Setup"},
+    {"id": "module1-ros2-basics", "title": "ROS 2: The Robotic Nervous System"},
+    {"id": "module1-ros2-nodes", "title": "ROS 2 Nodes, Topics & Services"},
+    {"id": "module1-ros2-python", "title": "Bridging Python Agents to ROS"},
+    {"id": "module1-ros2-urdf", "title": "URDF: Robot Description Format"},
+    {"id": "module2-gazebo", "title": "Gazebo Simulation Physics"},
+    {"id": "module2-unity", "title": "Unity for Human-Robot Interaction"},
+    {"id": "module2-sensors", "title": "Simulating LIDAR, Cameras & IMUs"},
+    {"id": "module3-isaac-sim", "title": "NVIDIA Isaac Sim & Synthetic Data"},
+    {"id": "module3-isaac-ros", "title": "Isaac ROS: VSLAM & Navigation"},
+    {"id": "module3-nav2", "title": "Nav2 for Bipedal Locomotion"},
+    {"id": "module4-vla-concepts", "title": "Vision-Language-Action Models"},
+    {"id": "module4-whisper", "title": "Voice-to-Action with Whisper"},
+    {"id": "capstone-project", "title": "Capstone: The Autonomous Humanoid"}
+  ]
+}
