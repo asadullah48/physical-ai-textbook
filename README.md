@@ -64,3 +64,7 @@ Asadullah Shafique - Panaversity Hackathon 2025
 
 ## 📄 License
 Educational project for hackathon submission
+
+## 📹 Demo Video
+[Watch Demo Video](https://youtu.be/XzH21y6hLjs)
+
