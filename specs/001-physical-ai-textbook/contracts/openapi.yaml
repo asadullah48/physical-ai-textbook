@@ -1,0 +1,918 @@
+openapi: 3.1.0
+info:
+  title: Physical AI Textbook Platform API
+  description: |
+    REST API for the Physical AI & Humanoid Robotics Textbook Platform.
+    Provides endpoints for user authentication, content retrieval, RAG chatbot,
+    content personalization, and Urdu translation.
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+servers:
+  - url: https://api.physical-ai-textbook.fly.dev
+    description: Production server
+  - url: http://localhost:8000
+    description: Development server
+
+tags:
+  - name: Auth
+    description: User authentication and profile management
+  - name: Content
+    description: Textbook content retrieval
+  - name: Chat
+    description: RAG-powered Q&A chatbot
+  - name: Personalization
+    description: Content adaptation based on user profile
+  - name: Translation
+    description: Urdu translation of content
+
+paths:
+  # ============== AUTHENTICATION ==============
+  /api/auth/signup:
+    post:
+      tags: [Auth]
+      summary: Create new user account
+      description: Register a new user with email and password (Step 1 of signup)
+      operationId: signupUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input (email format, password requirements)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate user
+      description: Login with email and password, returns session token
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          headers:
+            Set-Cookie:
+              description: Session cookie
+              schema:
+                type: string
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: End user session
+      description: Logout and invalidate session token
+      operationId: logoutUser
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Logout successful
+        '401':
+          description: Not authenticated
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user
+      description: Retrieve authenticated user's information
+      operationId: getCurrentUser
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Not authenticated
+
+  # ============== USER PROFILE ==============
+  /api/profile:
+    get:
+      tags: [Auth]
+      summary: Get user profile
+      description: Retrieve user's learning profile and background
+      operationId: getProfile
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Not authenticated
+        '404':
+          description: Profile not found (questionnaire not completed)
+
+    put:
+      tags: [Auth]
+      summary: Update user profile
+      description: Update or complete the learning profile questionnaire
+      operationId: updateProfile
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdateRequest'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Not authenticated
+
+  # ============== CONTENT ==============
+  /api/modules:
+    get:
+      tags: [Content]
+      summary: List all modules
+      description: Get all textbook modules with chapter counts
+      operationId: listModules
+      responses:
+        '200':
+          description: List of modules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Module'
+
+  /api/modules/{moduleSlug}:
+    get:
+      tags: [Content]
+      summary: Get module details
+      description: Get module information with list of chapters
+      operationId: getModule
+      parameters:
+        - name: moduleSlug
+          in: path
+          required: true
+          schema:
+            type: string
+          example: ros2-fundamentals
+      responses:
+        '200':
+          description: Module details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModuleDetail'
+        '404':
+          description: Module not found
+
+  /api/modules/{moduleSlug}/chapters/{chapterSlug}:
+    get:
+      tags: [Content]
+      summary: Get chapter content
+      description: Retrieve full chapter content in Markdown format
+      operationId: getChapter
+      parameters:
+        - name: moduleSlug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chapterSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Chapter content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chapter'
+        '404':
+          description: Chapter not found
+
+  # ============== CHATBOT ==============
+  /api/chat/conversations:
+    get:
+      tags: [Chat]
+      summary: List user conversations
+      description: Get paginated list of user's chat conversations
+      operationId: listConversations
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ConversationSummary'
+                  total:
+                    type: integer
+        '401':
+          description: Not authenticated
+
+    post:
+      tags: [Chat]
+      summary: Create new conversation
+      description: Start a new chat conversation
+      operationId: createConversation
+      security:
+        - sessionAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chapterSlug:
+                  type: string
+                  description: Optional chapter context
+      responses:
+        '201':
+          description: Conversation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+
+  /api/chat/conversations/{conversationId}:
+    get:
+      tags: [Chat]
+      summary: Get conversation
+      description: Retrieve conversation with all messages
+      operationId: getConversation
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '404':
+          description: Conversation not found
+
+  /api/chat/conversations/{conversationId}/messages:
+    post:
+      tags: [Chat]
+      summary: Send message
+      description: Send a message and receive AI response with textbook references
+      operationId: sendMessage
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessageRequest'
+      responses:
+        '200':
+          description: AI response with references
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessageResponse'
+        '400':
+          description: Invalid message
+        '401':
+          description: Not authenticated
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/chat/ask:
+    post:
+      tags: [Chat]
+      summary: Quick question (no conversation)
+      description: Ask a single question without creating a conversation (anonymous allowed)
+      operationId: askQuestion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuickAskRequest'
+      responses:
+        '200':
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessageResponse'
+        '429':
+          description: Rate limit exceeded
+
+  # ============== PERSONALIZATION ==============
+  /api/personalize/{moduleSlug}/{chapterSlug}:
+    post:
+      tags: [Personalization]
+      summary: Personalize chapter content
+      description: |
+        Generate personalized chapter content based on user profile.
+        Requires completed profile (FR-020).
+      operationId: personalizeChapter
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: moduleSlug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chapterSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Personalized content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalizedContent'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Profile incomplete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Chapter not found
+        '429':
+          description: Rate limit exceeded
+
+    get:
+      tags: [Personalization]
+      summary: Get cached personalization
+      description: Retrieve previously generated personalized content (if cached)
+      operationId: getCachedPersonalization
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: moduleSlug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chapterSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cached personalized content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalizedContent'
+        '404':
+          description: No cached personalization
+
+  # ============== TRANSLATION ==============
+  /api/translate/{moduleSlug}/{chapterSlug}:
+    post:
+      tags: [Translation]
+      summary: Translate chapter to Urdu
+      description: |
+        Generate Urdu translation of chapter content.
+        Code blocks remain in English. Result is cached.
+      operationId: translateChapter
+      parameters:
+        - name: moduleSlug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chapterSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Translated content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslatedContent'
+        '404':
+          description: Chapter not found
+        '429':
+          description: Rate limit exceeded
+        '503':
+          description: Translation service unavailable
+
+    get:
+      tags: [Translation]
+      summary: Get cached translation
+      description: Retrieve previously generated Urdu translation (if cached)
+      operationId: getCachedTranslation
+      parameters:
+        - name: moduleSlug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chapterSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cached translation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslatedContent'
+        '404':
+          description: No cached translation
+
+  # ============== HEALTH ==============
+  /health:
+    get:
+      summary: Health check
+      description: Check API health status
+      operationId: healthCheck
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  version:
+                    type: string
+                    example: 1.0.0
+                  timestamp:
+                    type: string
+                    format: date-time
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+
+  schemas:
+    # ============== AUTH SCHEMAS ==============
+    SignupRequest:
+      type: object
+      required: [email, password, name]
+      properties:
+        email:
+          type: string
+          format: email
+          example: student@example.com
+        password:
+          type: string
+          minLength: 8
+          description: At least 8 characters
+          example: SecurePassword123
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: Alice Johnson
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        profileComplete:
+          type: boolean
+          description: Whether background questionnaire is completed
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    # ============== PROFILE SCHEMAS ==============
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        swExperience:
+          $ref: '#/components/schemas/ExperienceLevel'
+        hwExperience:
+          $ref: '#/components/schemas/ExperienceLevel'
+        interests:
+          type: array
+          items:
+            type: string
+          example: ["ros2", "manipulation", "perception"]
+        difficultyPreference:
+          $ref: '#/components/schemas/DifficultyPreference'
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProfileUpdateRequest:
+      type: object
+      required: [swExperience, hwExperience, difficultyPreference]
+      properties:
+        swExperience:
+          $ref: '#/components/schemas/ExperienceLevel'
+        hwExperience:
+          $ref: '#/components/schemas/ExperienceLevel'
+        interests:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        difficultyPreference:
+          $ref: '#/components/schemas/DifficultyPreference'
+
+    ExperienceLevel:
+      type: string
+      enum: [beginner, intermediate, advanced]
+
+    DifficultyPreference:
+      type: string
+      enum: [gentle, balanced, challenging]
+
+    # ============== CONTENT SCHEMAS ==============
+    Module:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+          example: ros2-fundamentals
+        title:
+          type: string
+          example: ROS 2 Fundamentals
+        description:
+          type: string
+        order:
+          type: integer
+        chapterCount:
+          type: integer
+
+    ModuleDetail:
+      allOf:
+        - $ref: '#/components/schemas/Module'
+        - type: object
+          properties:
+            chapters:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChapterSummary'
+
+    ChapterSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        title:
+          type: string
+        order:
+          type: integer
+
+    Chapter:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        moduleSlug:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+          description: Full chapter content in Markdown
+        order:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+        navigation:
+          $ref: '#/components/schemas/ChapterNavigation'
+
+    ChapterNavigation:
+      type: object
+      properties:
+        previous:
+          $ref: '#/components/schemas/ChapterSummary'
+          nullable: true
+        next:
+          $ref: '#/components/schemas/ChapterSummary'
+          nullable: true
+
+    # ============== CHAT SCHEMAS ==============
+    ConversationSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          description: Auto-generated from first message
+        messageCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        chapterSlug:
+          type: string
+          nullable: true
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        contextRefs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContextReference'
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    ContextReference:
+      type: object
+      properties:
+        chapterSlug:
+          type: string
+        section:
+          type: string
+        relevanceScore:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+
+    ChatMessageRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        highlightedText:
+          type: string
+          description: Optional text highlighted by user for context
+
+    QuickAskRequest:
+      type: object
+      required: [question]
+      properties:
+        question:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        chapterSlug:
+          type: string
+          description: Optional chapter context
+
+    ChatMessageResponse:
+      type: object
+      properties:
+        message:
+          $ref: '#/components/schemas/Message'
+        conversationId:
+          type: string
+          format: uuid
+          nullable: true
+
+    # ============== PERSONALIZATION SCHEMAS ==============
+    PersonalizedContent:
+      type: object
+      properties:
+        chapterSlug:
+          type: string
+        content:
+          type: string
+          description: Personalized Markdown content
+        adaptationMetadata:
+          $ref: '#/components/schemas/AdaptationMetadata'
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+
+    AdaptationMetadata:
+      type: object
+      properties:
+        profileSnapshot:
+          type: object
+          properties:
+            swExperience:
+              $ref: '#/components/schemas/ExperienceLevel'
+            hwExperience:
+              $ref: '#/components/schemas/ExperienceLevel'
+            difficultyPreference:
+              $ref: '#/components/schemas/DifficultyPreference'
+        sectionsModified:
+          type: array
+          items:
+            type: string
+        modificationSummary:
+          type: string
+
+    # ============== TRANSLATION SCHEMAS ==============
+    TranslatedContent:
+      type: object
+      properties:
+        chapterSlug:
+          type: string
+        targetLanguage:
+          type: string
+          example: ur
+        content:
+          type: string
+          description: Translated Markdown content (code blocks in English)
+        sourceHash:
+          type: string
+          description: SHA-256 hash of source content
+        createdAt:
+          type: string
+          format: date-time
+
+    # ============== ERROR SCHEMAS ==============
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: INVALID_INPUT
+        message:
+          type: string
+          description: Human-readable error message
+          example: Email format is invalid
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error details
