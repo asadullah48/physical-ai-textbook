@@ -9,9 +9,24 @@
 
 ## 🔗 Project Links
 
-- **Live Demo:** https://frontend-7bu6ugdjh-asadullah-shafiques-projects.vercel.app
-- **GitHub Repository:** https://github.com/asadullah48/physical-ai-textbook
-- **Demo Video:** https://youtu.be/XzH21y6hLjs
+### Live Demos:
+- **🤗 Hugging Face Space (AI Showcase):** https://huggingface.co/spaces/asadullahshafique/physicalairobotics
+  - Interactive Gradio interface with 3 AI teaching modes
+  - Try Helpful, Socratic, and Embodiment (RAIA) modes
+  - No installation needed - live demo!
+
+- **🌐 Vercel Frontend:** https://frontend-7bu6ugdjh-asadullah-shafiques-projects.vercel.app
+  - Full Next.js application
+  - Voice mode enabled
+  - Modern responsive UI
+
+- **💻 GitHub Repository:** https://github.com/asadullah48/physical-ai-textbook
+  - Complete source code with Spec-Kit Plus methodology
+  - Docker deployment ready
+  - Comprehensive documentation
+
+- **🎥 Demo Video:** https://youtu.be/XzH21y6hLjs
+  - (Original version - new video with working AI features recording soon!)
 
 ---
 

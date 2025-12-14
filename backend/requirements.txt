@@ -3,3 +3,20 @@ uvicorn[standard]==0.24.0
 pydantic==2.5.0
 pydantic-settings==2.1.0
 python-multipart==0.0.6
+
+# RAG & AI - Multiple Providers Support
+google-generativeai==0.3.2  # Gemini (Primary - FREE 1M tokens/min!)
+anthropic==0.18.1  # Claude (Backup - High quality)
+openai==1.6.1  # OpenAI (Optional)
+cohere==4.47  # For embeddings with Claude
+qdrant-client==1.7.0  # Vector database
+python-dotenv==1.0.0  # Environment variables
+
+# Content Processing
+markdown==3.5.1
+beautifulsoup4==4.12.2
+tiktoken==0.5.2
+
+# Database
+sqlalchemy==2.0.23
+aiosqlite==0.19.0

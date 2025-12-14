@@ -1,0 +1,16 @@
+# Hugging Face Spaces requirements
+gradio==4.16.0
+fastapi==0.104.1
+pydantic==2.5.0
+python-dotenv==1.0.0
+
+# AI Providers
+google-generativeai==0.3.2
+anthropic==0.18.1
+openai==1.6.1
+cohere==4.47
+
+# Content Processing
+markdown==3.5.1
+beautifulsoup4==4.12.2
+tiktoken==0.5.2

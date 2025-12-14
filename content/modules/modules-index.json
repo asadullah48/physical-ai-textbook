@@ -1,0 +1,199 @@
+{
+  "modules": [
+    {
+      "id": "01-physical-ai-intro",
+      "title": "Introduction to Physical AI",
+      "icon": "🤖",
+      "description": "Fundamentals of Physical AI, its applications in robotics, and key concepts including sensors and actuators.",
+      "difficulty": "beginner",
+      "estimated_hours": 4,
+      "prerequisites": [],
+      "chapters": [
+        {
+          "id": "01-fundamentals",
+          "title": "Fundamentals of Physical AI",
+          "file": "01-fundamentals.md",
+          "learning_objectives": [
+            "Define Physical AI and embodied intelligence",
+            "Identify the sensor-actuator feedback loop",
+            "Recognize real-world applications",
+            "Understand sim-to-real gap challenges"
+          ],
+          "skills": ["physical_ai_concepts", "robotics_fundamentals", "control_loops"]
+        },
+        {
+          "id": "02-sensors-actuators",
+          "title": "Sensors and Actuators Deep Dive",
+          "file": "02-sensors-actuators.md",
+          "learning_objectives": [
+            "Compare LIDAR, cameras, and IMU sensors",
+            "Implement sensor fusion techniques",
+            "Apply PID control for motor systems",
+            "Process raw sensor data into actionable information"
+          ],
+          "skills": ["sensor_processing", "actuator_control", "pid_tuning", "sensor_fusion"]
+        }
+      ]
+    },
+    {
+      "id": "02-ros2-fundamentals",
+      "title": "ROS 2 Fundamentals",
+      "icon": "🔧",
+      "description": "Robot Operating System 2 architecture, nodes, topics, services, and building modular robot software.",
+      "difficulty": "intermediate",
+      "estimated_hours": 6,
+      "prerequisites": ["01-physical-ai-intro"],
+      "chapters": [
+        {
+          "id": "01-ros2-architecture",
+          "title": "ROS 2 Architecture and Concepts",
+          "file": "01-ros2-architecture.md",
+          "learning_objectives": [
+            "Understand ROS 2 computational graph",
+            "Distinguish nodes, topics, and services",
+            "Set up ROS 2 development environment",
+            "Create your first ROS 2 node"
+          ],
+          "skills": ["ros2_architecture", "node_development", "topic_pub_sub"]
+        },
+        {
+          "id": "02-communication-patterns",
+          "title": "Communication Patterns in ROS 2",
+          "file": "02-communication-patterns.md",
+          "learning_objectives": [
+            "Implement publisher-subscriber patterns",
+            "Create service-client interactions",
+            "Use actions for long-running tasks",
+            "Apply Quality of Service (QoS) policies"
+          ],
+          "skills": ["pub_sub", "services", "actions", "qos_configuration"]
+        }
+      ]
+    },
+    {
+      "id": "03-simulation",
+      "title": "Simulation Environments",
+      "icon": "🎮",
+      "description": "Using Gazebo and Isaac Sim for testing robotics applications in virtual environments.",
+      "difficulty": "intermediate",
+      "estimated_hours": 5,
+      "prerequisites": ["02-ros2-fundamentals"],
+      "chapters": [
+        {
+          "id": "01-gazebo-basics",
+          "title": "Gazebo Simulation Fundamentals",
+          "file": "01-gazebo-basics.md",
+          "learning_objectives": [
+            "Launch Gazebo simulation environments",
+            "Create robot models with URDF/SDF",
+            "Add sensors and actuators to simulated robots",
+            "Interface Gazebo with ROS 2"
+          ],
+          "skills": ["gazebo_simulation", "urdf_modeling", "sensor_simulation"]
+        }
+      ]
+    },
+    {
+      "id": "04-isaac-platform",
+      "title": "NVIDIA Isaac Platform",
+      "icon": "🎯",
+      "description": "Leveraging NVIDIA Isaac for advanced robot development, perception, and manipulation.",
+      "difficulty": "advanced",
+      "estimated_hours": 8,
+      "prerequisites": ["03-simulation"],
+      "chapters": [
+        {
+          "id": "01-isaac-sim",
+          "title": "Isaac Sim for Photorealistic Simulation",
+          "file": "01-isaac-sim.md",
+          "learning_objectives": [
+            "Set up NVIDIA Isaac Sim",
+            "Create photorealistic robot environments",
+            "Generate synthetic data for training",
+            "Leverage RTX ray tracing for sensor simulation"
+          ],
+          "skills": ["isaac_sim", "synthetic_data", "sensor_realism"]
+        }
+      ]
+    },
+    {
+      "id": "05-vla-systems",
+      "title": "Vision-Language-Action Systems",
+      "icon": "🧠",
+      "description": "Advanced multimodal AI systems combining vision, language understanding, and robotic action.",
+      "difficulty": "advanced",
+      "estimated_hours": 10,
+      "prerequisites": ["04-isaac-platform"],
+      "chapters": [
+        {
+          "id": "01-vla-introduction",
+          "title": "Introduction to VLA Models",
+          "file": "01-vla-introduction.md",
+          "learning_objectives": [
+            "Understand vision-language-action architectures",
+            "Explore transformer-based robot policies",
+            "Implement instruction following robots",
+            "Evaluate VLA model performance"
+          ],
+          "skills": ["vla_architecture", "multimodal_ai", "instruction_following", "robot_policies"]
+        }
+      ]
+    }
+  ],
+  "skill_graph": {
+    "nodes": [
+      {"id": "physical_ai_concepts", "label": "Physical AI Concepts", "module": "01"},
+      {"id": "robotics_fundamentals", "label": "Robotics Fundamentals", "module": "01"},
+      {"id": "control_loops", "label": "Control Loops", "module": "01"},
+      {"id": "sensor_processing", "label": "Sensor Processing", "module": "01"},
+      {"id": "actuator_control", "label": "Actuator Control", "module": "01"},
+      {"id": "pid_tuning", "label": "PID Tuning", "module": "01"},
+      {"id": "sensor_fusion", "label": "Sensor Fusion", "module": "01"},
+      {"id": "ros2_architecture", "label": "ROS 2 Architecture", "module": "02"},
+      {"id": "node_development", "label": "Node Development", "module": "02"},
+      {"id": "topic_pub_sub", "label": "Topic Pub/Sub", "module": "02"},
+      {"id": "pub_sub", "label": "Publisher-Subscriber", "module": "02"},
+      {"id": "services", "label": "Services", "module": "02"},
+      {"id": "actions", "label": "Actions", "module": "02"},
+      {"id": "qos_configuration", "label": "QoS Configuration", "module": "02"},
+      {"id": "gazebo_simulation", "label": "Gazebo Simulation", "module": "03"},
+      {"id": "urdf_modeling", "label": "URDF Modeling", "module": "03"},
+      {"id": "sensor_simulation", "label": "Sensor Simulation", "module": "03"},
+      {"id": "isaac_sim", "label": "Isaac Sim", "module": "04"},
+      {"id": "synthetic_data", "label": "Synthetic Data", "module": "04"},
+      {"id": "sensor_realism", "label": "Sensor Realism", "module": "04"},
+      {"id": "vla_architecture", "label": "VLA Architecture", "module": "05"},
+      {"id": "multimodal_ai", "label": "Multimodal AI", "module": "05"},
+      {"id": "instruction_following", "label": "Instruction Following", "module": "05"},
+      {"id": "robot_policies", "label": "Robot Policies", "module": "05"}
+    ],
+    "edges": [
+      {"from": "physical_ai_concepts", "to": "robotics_fundamentals"},
+      {"from": "robotics_fundamentals", "to": "control_loops"},
+      {"from": "robotics_fundamentals", "to": "sensor_processing"},
+      {"from": "control_loops", "to": "actuator_control"},
+      {"from": "control_loops", "to": "pid_tuning"},
+      {"from": "sensor_processing", "to": "sensor_fusion"},
+      {"from": "sensor_processing", "to": "ros2_architecture"},
+      {"from": "actuator_control", "to": "ros2_architecture"},
+      {"from": "ros2_architecture", "to": "node_development"},
+      {"from": "node_development", "to": "topic_pub_sub"},
+      {"from": "topic_pub_sub", "to": "pub_sub"},
+      {"from": "pub_sub", "to": "services"},
+      {"from": "services", "to": "actions"},
+      {"from": "topic_pub_sub", "to": "qos_configuration"},
+      {"from": "ros2_architecture", "to": "gazebo_simulation"},
+      {"from": "sensor_processing", "to": "sensor_simulation"},
+      {"from": "gazebo_simulation", "to": "urdf_modeling"},
+      {"from": "urdf_modeling", "to": "sensor_simulation"},
+      {"from": "gazebo_simulation", "to": "isaac_sim"},
+      {"from": "sensor_simulation", "to": "sensor_realism"},
+      {"from": "isaac_sim", "to": "synthetic_data"},
+      {"from": "isaac_sim", "to": "vla_architecture"},
+      {"from": "sensor_realism", "to": "vla_architecture"},
+      {"from": "vla_architecture", "to": "multimodal_ai"},
+      {"from": "multimodal_ai", "to": "instruction_following"},
+      {"from": "instruction_following", "to": "robot_policies"}
+    ]
+  }
+}

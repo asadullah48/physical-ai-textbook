@@ -27,7 +27,36 @@ This project was developed using the Spec-Kit Plus methodology:
 - **Backend:** FastAPI, Python
 - **Development:** Spec-Kit Plus methodology
 
-## 🚀 Quick Start
+## 🚀 Live Demo
+
+### 🤗 Hugging Face Space (Primary Demo)
+https://huggingface.co/spaces/asadullahshafique/physicalairobotics
+
+An interactive AI-powered textbook for **Physical AI & Humanoid Robotics** featuring:
+
+- **Helpful Mode** – Direct explanations with structured knowledge
+- **Socratic Mode** – Question-driven learning (AI teaches by asking)
+- **Embodiment Mode (RAIA)** – AI learns as a robot with sensors & actuators
+
+No installation required. Runs fully in the browser.
+
+---
+
+### 🌐 Web Frontend (Extended Experience)
+https://frontend-7bu6ugdjh-asadullah-shafiques-projects.vercel.app
+
+- Next.js frontend
+- Voice-enabled interaction
+- Modern UI
+
+---
+
+### 💻 Source Code
+https://github.com/asadullah48/physical-ai-textbook
+
+---
+
+## 🏃 Quick Start (Local Development)
 
 ### Backend
 ```bash
