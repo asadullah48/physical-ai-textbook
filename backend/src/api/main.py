@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from src.services.rag_service import rag_service
 
 app = FastAPI(title="Physical AI Textbook API")
 
@@ -25,21 +26,31 @@ async def list_modules():
         {"slug": "05-vla", "title": "Vision-Language-Action Systems", "icon": "🧠", "description": "Advanced multimodal AI systems for intelligent behavior.", "chapter_count": 1}
     ]
 
+from src.services.agent_service import agent_service
+
 @app.post("/api/v1/chat")
 async def chat(request: dict):
-    message = request.get("message", "").lower()
+    """
+    Unified Chat Endpoint.
+    Uses the AgentService which decides whether to use RAG, Math, or just Chat.
+    """
+    message = request.get("message", "")
+    if not message:
+        return {"response": "Please provide a question.", "sources": [], "steps": []}
     
-    responses = {
-        "ros": "ROS 2 (Robot Operating System 2) is a flexible framework for writing robot software. It provides tools, libraries, and conventions to simplify creating complex robot behavior.",
-        "physical ai": "Physical AI refers to AI systems that interact with the physical world through embodied agents like robots. It combines perception, reasoning, and action in real environments.",
-        "sensor": "Sensors in robotics include LIDAR for distance measurement, cameras for vision, IMUs for orientation, and force sensors for tactile feedback.",
-        "simulation": "Simulation environments like Gazebo and Isaac Sim allow testing robot behaviors in virtual environments before deploying to real hardware.",
-    }
+    # Use the Agent Service (LangGraph)
+    result = agent_service.invoke(message)
     
-    response_text = "I'm an AI tutor for Physical AI. I can help you understand robotics, ROS 2, and simulation. What would you like to learn?"
-    for key, value in responses.items():
-        if key in message:
-            response_text = value
-            break
-    
-    return {"response": response_text, "sources": []}
+    return result
+
+@app.get("/api/v1/ingest")
+async def trigger_ingest():
+    """Admin endpoint to trigger ingestion (for demo purposes)"""
+    # In a real app, this would be authenticated or a background task
+    try:
+        from src.scripts.ingest_seed import ingest_data
+        ingest_data()
+        rag_service.load_db() # Reload the DB
+        return {"status": "Ingestion successful"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}

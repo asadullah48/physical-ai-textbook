@@ -24,15 +24,15 @@ export default async function Home() {
       <section className="bg-white border-b py-10">
         <div className="container mx-auto px-6 max-w-6xl grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
-            { icon: '📘', label: '5 Modules' },
-            { icon: '💻', label: 'Code Labs' },
-            { icon: '🤖', label: 'AI Tutor' },
-            { icon: '🎙️', label: 'Voice Mode' }
+            { icon: '📘', label: '5 Modules', href: '/modules/01-physical-ai-intro' },
+            { icon: '💻', label: 'Code Labs', href: '#' },
+            { icon: '🤖', label: 'AI Tutor', href: '#' },
+            { icon: '🔬', label: 'Sim Lab', href: '/lab' }
           ].map((item, i) => (
-            <div key={i} className="p-4">
+            <Link key={i} href={item.href} className="p-4 block hover:bg-gray-50 rounded-lg transition-colors">
               <div className="text-3xl mb-2">{item.icon}</div>
               <div className="font-medium text-gray-700">{item.label}</div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -42,8 +42,8 @@ export default async function Home() {
           <h2 className="text-3xl font-bold text-center mb-10">Course Modules</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {modules.map((module, index) => (
-              <Link 
-                key={module.slug} 
+              <Link
+                key={module.slug}
                 href={`/modules/${module.slug}`}
                 className="bg-white border rounded-xl p-6 hover:border-indigo-600 hover:shadow-md transition-all"
               >
