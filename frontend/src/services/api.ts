@@ -45,23 +45,32 @@ const mockModules: Module[] = [
 ];
 
 class APIClient {
+  private baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+
   async getModules(): Promise<Module[]> {
-    return mockModules;
+    try {
+      const res = await fetch(`${this.baseUrl}/modules`);
+      if (!res.ok) throw new Error('Failed to fetch modules');
+      return res.json();
+    } catch (error) {
+      console.error("API Error:", error);
+      return mockModules; // Fallback to mock if API fails
+    }
   }
 
-  async chat(message: string) {
-    const msg = message.toLowerCase();
-    let response = "I'm an AI tutor for Physical AI. Ask me about robotics, ROS 2, or simulation!";
-    
-    if (msg.includes("ros")) {
-      response = "ROS 2 is a flexible framework for robot software with tools and libraries for complex robot behavior.";
-    } else if (msg.includes("physical ai")) {
-      response = "Physical AI refers to AI systems that interact with the physical world through robots, combining perception and action.";
-    } else if (msg.includes("sensor")) {
-      response = "Sensors include LIDAR, cameras, IMUs, and force sensors for robot perception.";
+  async chat(message: string, history: any[] = []) {
+    try {
+      const res = await fetch(`${this.baseUrl}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, history }),
+      });
+      if (!res.ok) throw new Error('Failed to send message');
+      return res.json();
+    } catch (error) {
+      console.error("API Error:", error);
+      return { response: "Sorry, I cannot connect to the brain right now. Please check if the backend is running.", sources: [] };
     }
-    
-    return { response, sources: [] };
   }
 
   content = {

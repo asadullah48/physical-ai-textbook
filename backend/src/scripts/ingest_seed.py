@@ -8,40 +8,48 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def ingest_data():
-    # TEMPORARY: Ingesting a dummy file for testing. 
-    # In production/next-step, we will scan the 'content' directory of the textbook.
+    # Define content directory (relative to this script: ../../content)
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    content_dir = os.path.join(base_dir, "content")
     
-    sample_text = """
-    # Physical AI Introduction
-    Physical AI (PAI) refers to AI systems that perceive, reason, and act in the physical world.
-    Unlike Generative AI which outputs text/images, Physical AI outputs motor commands and forces.
+    if not os.path.exists(content_dir):
+        print(f"❌ Content directory not found at {content_dir}")
+        return
+
+    documents = []
     
-    ## Embodiment
-    Embodiment is the hypothesis that intelligence emerges from the interaction of an agent with an environment.
-    
-    ## ROS 2
-    ROS 2 is the standard middleware for robotics. It uses a DDS (Data Distribution Service) for real-time communication.
-    """
-    
-    # Save temp file
-    with open("temp_knowledge.md", "w") as f:
-        f.write(sample_text)
-        
-    loader = TextLoader("temp_knowledge.md")
-    documents = loader.load()
-    
+    # Iterate over all .md files in the content directory
+    print(f"📂 Scanning for content in {content_dir}...")
+    for filename in os.listdir(content_dir):
+        if filename.endswith(".md"):
+            file_path = os.path.join(content_dir, filename)
+            try:
+                loader = TextLoader(file_path, encoding='utf-8')
+                docs = loader.load()
+                # Add source metadata just in case (TextLoader usually does this)
+                for doc in docs:
+                    doc.metadata["source"] = filename
+                documents.extend(docs)
+                print(f"  - Loaded {filename}")
+            except Exception as e:
+                print(f"  ❌ Failed to load {filename}: {e}")
+
+    if not documents:
+        print("⚠️ No documents found to ingest.")
+        return
+
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     texts = text_splitter.split_documents(documents)
     
     embeddings = OpenAIEmbeddings()
     
-    print("Creating Vector DB...")
-    db = Chroma.from_documents(texts, embeddings, persist_directory="./db")
-    db.persist()
-    print("✅ Ingestion Complete. DB created at ./db")
+    persist_dir = os.path.join(base_dir, "db")
+    print(f"Using DB directory: {persist_dir}")
     
-    # Cleanup
-    os.remove("temp_knowledge.md")
+    print("Creating Vector DB...")
+    db = Chroma.from_documents(texts, embeddings, persist_directory=persist_dir)
+    db.persist()
+    print(f"✅ Ingestion Complete. {len(texts)} chunks stored in {persist_dir}")
 
 if __name__ == "__main__":
     if not os.environ.get("OPENAI_API_KEY"):

@@ -22,8 +22,12 @@ class RAGService:
     def load_db(self):
         """Loads the ChromaDB and sets up the QA chain."""
         try:
+            # Ensure we look in the right place relative to project root
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            real_persist_directory = os.path.join(base_dir, "db")
+            
             self.db = Chroma(
-                persist_directory=self.persist_directory, 
+                persist_directory=real_persist_directory, 
                 embedding_function=self.embeddings
             )
             

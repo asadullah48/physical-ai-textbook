@@ -38,7 +38,7 @@ def quiz_generator(topic: str):
     """Generates a short quiz to test the user's understanding of a specific topic."""
     # We use RAG to get the facts first
     context = rag_service.query(topic)
-    return f"CONTEXT: {context['response']}\n\nINSTRUCTION: Create a 3-question multiple choice quiz based on the above context. Format it cleanly."
+    return f"CONTEXT: {context['response']}\n\nINSTRUCTION: Create a 3-question multiple choice quiz based on the above context. Return the result in valid JSON format with keys: 'question', 'options' (list), 'correct_answer' (index). Do not include any markdown formatting like ```json."
 
 tools = [search_textbook, physics_calculator, quiz_generator]
 tool_executor = ToolExecutor(tools)
@@ -115,8 +115,19 @@ workflow.add_edge("action", "agent")
 app = workflow.compile()
 
 class AgentService:
-    def invoke(self, message: str):
-        inputs = {"messages": [HumanMessage(content=message)]}
+    def invoke(self, message: str, history: List[dict] = []):
+        # Convert simple history dicts to LangChain messages
+        lc_messages = []
+        for msg in history:
+            if msg['role'] == 'user':
+                lc_messages.append(HumanMessage(content=msg['content']))
+            elif msg['role'] == 'assistant':
+                lc_messages.append(AIMessage(content=msg['content']))
+        
+        # Add current message
+        lc_messages.append(HumanMessage(content=message))
+        
+        inputs = {"messages": lc_messages}
         result = app.invoke(inputs)
         
         # Extract final response

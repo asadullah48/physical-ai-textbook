@@ -17,6 +17,9 @@ export default async function Home() {
             <Link href="/modules/01-physical-ai-intro" className="px-8 py-3 bg-white text-indigo-700 rounded-lg font-semibold shadow-sm hover:shadow-md transition-all">
               Start Learning →
             </Link>
+            <Link href="/chat" className="px-8 py-3 bg-indigo-600 text-white rounded-lg font-semibold border border-indigo-500 shadow-sm hover:shadow-md transition-all">
+              Ask AI Tutor 🤖
+            </Link>
           </div>
         </div>
       </section>
@@ -26,7 +29,7 @@ export default async function Home() {
           {[
             { icon: '📘', label: '5 Modules', href: '/modules/01-physical-ai-intro' },
             { icon: '💻', label: 'Code Labs', href: '#' },
-            { icon: '🤖', label: 'AI Tutor', href: '#' },
+            { icon: '🤖', label: 'AI Tutor', href: '/chat' },
             { icon: '🔬', label: 'Sim Lab', href: '/lab' }
           ].map((item, i) => (
             <Link key={i} href={item.href} className="p-4 block hover:bg-gray-50 rounded-lg transition-colors">

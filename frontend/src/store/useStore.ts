@@ -1,47 +1,53 @@
-import { create } from 'zustand'
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-interface ChatMessage {
+export interface Message {
     role: 'user' | 'assistant';
     content: string;
     sources?: string[];
     steps?: string[];
+    timestamp?: number;
 }
 
 interface AppState {
-    // Navigation State
-    currentModuleId: string | null;
-    setCurrentModuleId: (id: string | null) => void;
-
     // Chat State
-    chatHistory: ChatMessage[];
-    addMessage: (msg: ChatMessage) => void;
-    clearChat: () => void;
-    isChatOpen: boolean;
-    toggleChat: () => void;
+    messages: Message[];
+    addMessage: (msg: Message) => void;
+    clearMessages: () => void;
 
-    // Learning State (Persisted in real app)
-    completedModules: string[];
-    markModuleComplete: (moduleId: string) => void;
+    // UI State
+    isSidebarOpen: boolean;
+    toggleSidebar: () => void;
+
+    // Lab State
+    activeModuleId: string | null;
+    setActiveModule: (id: string | null) => void;
 }
 
-export const useStore = create<AppState>((set) => ({
-    currentModuleId: null,
-    setCurrentModuleId: (id) => set({ currentModuleId: id }),
+export const useStore = create<AppState>()(
+    persist(
+        (set) => ({
+            messages: [
+                {
+                    role: 'assistant',
+                    content: "Hello! I'm Professor PhysAI. I'm ready to help you with your research in Physical AI. What's on your mind?",
+                    timestamp: Date.now()
+                }
+            ],
+            addMessage: (msg) => set((state) => ({
+                messages: [...state.messages, { ...msg, timestamp: Date.now() }]
+            })),
+            clearMessages: () => set({ messages: [] }),
 
-    chatHistory: [
+            isSidebarOpen: true,
+            toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+
+            activeModuleId: null,
+            setActiveModule: (id) => set({ activeModuleId: id }),
+        }),
         {
-            role: 'assistant',
-            content: 'Hello! I am your Physical AI Professor. Ask me anything about the textbook or robotics concepts.'
+            name: 'physai-storage', // unique name
+            partialize: (state) => ({ messages: state.messages }), // Persist only messages by default
         }
-    ],
-    addMessage: (msg) => set((state) => ({ chatHistory: [...state.chatHistory, msg] })),
-    clearChat: () => set({ chatHistory: [] }),
-
-    isChatOpen: false,
-    toggleChat: () => set((state) => ({ isChatOpen: !state.isChatOpen })),
-
-    completedModules: [],
-    markModuleComplete: (id) => set((state) => ({
-        completedModules: [...state.completedModules, id]
-    })),
-}))
+    )
+);

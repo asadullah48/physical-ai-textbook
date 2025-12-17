@@ -35,11 +35,13 @@ async def chat(request: dict):
     Uses the AgentService which decides whether to use RAG, Math, or just Chat.
     """
     message = request.get("message", "")
+    history = request.get("history", []) # New: Accept history
+    
     if not message:
         return {"response": "Please provide a question.", "sources": [], "steps": []}
     
-    # Use the Agent Service (LangGraph)
-    result = agent_service.invoke(message)
+    # Use the Agent Service (LangGraph) with history
+    result = agent_service.invoke(message, history)
     
     return result
 
