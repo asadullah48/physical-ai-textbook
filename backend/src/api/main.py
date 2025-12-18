@@ -30,29 +30,10 @@ from src.services.agent_service import agent_service
 
 @app.post("/api/v1/chat")
 async def chat(request: dict):
-    """
-    Unified Chat Endpoint.
-    Uses the AgentService which decides whether to use RAG, Math, or just Chat.
-    """
     message = request.get("message", "")
-    history = request.get("history", []) # New: Accept history
-    
     if not message:
         return {"response": "Please provide a question.", "sources": [], "steps": []}
-    
-    # Use the Agent Service (LangGraph) with history
-    result = agent_service.invoke(message, history)
-    
-    return result
 
-@app.get("/api/v1/ingest")
-async def trigger_ingest():
-    """Admin endpoint to trigger ingestion (for demo purposes)"""
-    # In a real app, this would be authenticated or a background task
-    try:
-        from src.scripts.ingest_seed import ingest_data
-        ingest_data()
-        rag_service.load_db() # Reload the DB
-        return {"status": "Ingestion successful"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    # Agent only takes message (no history parameter)
+    result = agent_service.invoke(message)
+    return result

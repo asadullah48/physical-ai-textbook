@@ -2,6 +2,8 @@
 
 Interactive educational platform for learning Physical AI, ROS 2, and humanoid robotics.
 
+**Live Demo:** [https://frontend-7bu6ugdjh-asadullah-shafiques-projects.vercel.app](https://frontend-7bu6ugdjh-asadullah-shafiques-projects.vercel.app)
+
 ## 🏆 Built for Panaversity Hackathon 2025
 
 **Development Methodology:** Spec-Kit Plus (Specification-first development)

@@ -1,9 +1,9 @@
 import os
-from langchain_community.vectorstores import Chroma
-from langchain_openai import OpenAIEmbeddings
-from langchain_openai import ChatOpenAI
-from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
+from langchain_chroma import Chroma
+from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,70 +11,66 @@ load_dotenv()
 class RAGService:
     def __init__(self, persist_directory="./db"):
         self.persist_directory = persist_directory
-        self.embeddings = OpenAIEmbeddings()
+        self.embeddings = GoogleGenerativeAIEmbeddings(
+            model="models/embedding-001",
+            google_api_key=os.getenv("GOOGLE_API_KEY")
+        )
         self.db = None
-        self.qa_chain = None
-        
-        # Initialize if DB exists, otherwise wait for ingestion
+        self.chain = None
+
         if os.path.exists(persist_directory):
             self.load_db()
 
     def load_db(self):
-        """Loads the ChromaDB and sets up the QA chain."""
         try:
-            # Ensure we look in the right place relative to project root
-            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            real_persist_directory = os.path.join(base_dir, "db")
-            
             self.db = Chroma(
-                persist_directory=real_persist_directory, 
+                persist_directory=self.persist_directory,
                 embedding_function=self.embeddings
             )
+
+            retriever = self.db.as_retriever(search_kwargs={"k": 3})
+
+            template = """Answer based on this context:
+
+Context: {context}
+
+Question: {question}
+
+Answer as a Physical AI Professor:"""
+
+            prompt = PromptTemplate.from_template(template)
             
-            retriever = self.db.as_retriever(
-                search_type="similarity",
-                search_kwargs={"k": 3}
+            llm = ChatGoogleGenerativeAI(
+                model="gemini-1.5-flash-latest",
+                google_api_key=os.getenv("GOOGLE_API_KEY"),
+                temperature=0
             )
 
-            # Custom prompt for "Professor" persona
-            prompt_template = """Use the following pieces of context to answer the question at the end. 
-            If you don't know the answer, just say that you don't know, don't try to make up an answer.
-            
-            Context: {context}
-            
-            Question: {question}
-            
-            Answer as a Physical AI & Robotics Professor. Be technical but accessible. Include code snippets if relevant:"""
-            
-            PROMPT = PromptTemplate(
-                template=prompt_template, input_variables=["context", "question"]
-            )
+            def format_docs(docs):
+                return "\n\n".join(doc.page_content for doc in docs)
 
-            llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
-            
-            self.qa_chain = RetrievalQA.from_chain_type(
-                llm=llm,
-                chain_type="stuff",
-                retriever=retriever,
-                chain_type_kwargs={"prompt": PROMPT},
-                return_source_documents=True
+            self.chain = (
+                {"context": retriever | format_docs, "question": RunnablePassthrough()}
+                | prompt
+                | llm
+                | StrOutputParser()
             )
-            print("✅ RAG Database loaded successfully.")
+            
+            self.retriever = retriever
+            print("✅ RAG with Gemini loaded!")
         except Exception as e:
-            print(f"⚠️ Failed to load RAG Database: {e}")
+            print(f"⚠️ Failed: {e}")
 
     def query(self, question: str):
-        if not self.qa_chain:
-            return {"response": "The knowledge base is currently offline or initializing.", "sources": []}
-        
-        result = self.qa_chain({"query": question})
-        answer = result["result"]
-        source_docs = result["source_documents"]
-        
-        # Format sources
-        sources = [doc.metadata.get("source", "Unknown") for doc in source_docs]
-        
-        return {"response": answer, "sources": sources}
+        if not self.chain:
+            return {"response": "KB initializing.", "sources": []}
 
-# Global Instance
+        try:
+            response = self.chain.invoke(question)
+            docs = self.retriever.invoke(question)
+            sources = [doc.metadata.get("source", "textbook") for doc in docs]
+            return {"response": response, "sources": sources}
+        except Exception as e:
+            return {"response": f"Error: {str(e)}", "sources": []}
+
 rag_service = RAGService()
