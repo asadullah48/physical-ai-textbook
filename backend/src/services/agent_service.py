@@ -1,16 +1,30 @@
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 import os
+from src.services.rag_service import rag_service
 
-client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+# Configure Gemini
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 class AgentService:
     def invoke(self, message: str):
         try:
-            response = client.models.generate_content(
-                model='gemini-2.0-flash-exp',
-                contents=f"You are a Physical AI Professor. Answer this question: {message}"
+            # First try RAG service for textbook-specific knowledge
+            rag_result = rag_service.query(message)
+            
+            # If RAG found relevant content (not just the initialization message)
+            if rag_result.get("sources") and len(rag_result["sources"]) > 0:
+                return {
+                    "response": rag_result["response"],
+                    "steps": ["Knowledge Base Retrieval", "Gemini 1.5 Flash"],
+                    "sources": rag_result["sources"]
+                }
+
+            # Fallback to general Gemini 1.5 if no specific context found
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            response = model.generate_content(
+                f"You are a Physical AI Professor. Answer this question: {message}"
             )
+            
             return {
                 "response": response.text,
                 "steps": ["Gemini 2.0 Flash"],

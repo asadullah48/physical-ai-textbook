@@ -1,9 +1,13 @@
 import os
-from langchain_chroma import Chroma
-from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
+try:
+    from langchain_community.vectorstores import Chroma
+    from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+    from langchain_core.prompts import PromptTemplate
+    from langchain_core.output_parsers import StrOutputParser
+    from langchain_core.runnables import RunnablePassthrough
+    LANGCHAIN_AVAILABLE = True
+except ImportError:
+    LANGCHAIN_AVAILABLE = False
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,17 +15,25 @@ load_dotenv()
 class RAGService:
     def __init__(self, persist_directory="./db"):
         self.persist_directory = persist_directory
-        self.embeddings = GoogleGenerativeAIEmbeddings(
-            model="models/embedding-001",
-            google_api_key=os.getenv("GOOGLE_API_KEY")
-        )
         self.db = None
         self.chain = None
+        
+        if not LANGCHAIN_AVAILABLE:
+            print("⚠️ LangChain dependencies missing. RAG service disabled.")
+            return
 
-        if os.path.exists(persist_directory):
-            self.load_db()
+        try:
+            self.embeddings = GoogleGenerativeAIEmbeddings(
+                model="models/embedding-001",
+                google_api_key=os.getenv("GOOGLE_API_KEY")
+            )
+            if os.path.exists(persist_directory):
+                self.load_db()
+        except Exception as e:
+            print(f"⚠️ RAG Init failed: {e}")
 
     def load_db(self):
+        if not LANGCHAIN_AVAILABLE: return
         try:
             self.db = Chroma(
                 persist_directory=self.persist_directory,
