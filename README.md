@@ -1,72 +1,52 @@
-# Physical AI & Humanoid Robotics Textbook
+# 🤖 Physical AI & Humanoid Robotics Textbook
 
-Interactive educational platform for learning Physical AI, ROS 2, and humanoid robotics.
+An interactive educational platform for learning Physical AI, robotics, and embodied intelligence with AI-powered tutoring and real-time simulations.
 
-**Live Demo:** [https://frontend-7bu6ugdjh-asadullah-shafiques-projects.vercel.app](https://frontend-7bu6ugdjh-asadullah-shafiques-projects.vercel.app)
+## 🌐 Live Demo
 
-## 🏆 Built for Panaversity Hackathon 2025
-
-**Development Methodology:** Spec-Kit Plus (Specification-first development)
-
-### Spec-Kit Plus Artifacts
-This project was developed using the Spec-Kit Plus methodology:
-- ✅ **Constitution** (`.specify/memory/constitution.md`) - Core principles and standards
-- ✅ **Specification** (`specs/001-physical-ai-textbook/spec.md`) - Detailed requirements
-- ✅ **Tasks** (`specs/001-physical-ai-textbook/tasks.md`) - 120 structured tasks
-- ✅ **Architecture** (`specs/001-physical-ai-textbook/plan.md`) - Technical design
-- ✅ **Data Model** (`specs/001-physical-ai-textbook/data-model.md`) - Database schema
+**🔗 [View Live Site](https://frontend-k6n2r8rvt-asadullah-shafiques-projects.vercel.app)**
 
 ## ✨ Features
-- 📚 **5 Comprehensive Modules** covering Physical AI fundamentals to advanced topics
-- 💬 **AI-Powered Chatbot** with mock responses (expandable to RAG)
-- 🎙️ **Voice Mode** - Speech-to-text input and text-to-speech output
-- 💻 **Interactive Code Examples** 
-- 🌐 **Modern Responsive Design**
-- 🎯 **Progressive Learning Path**
+
+### 📚 Interactive Learning
+- **5 Comprehensive Modules** covering Physical AI fundamentals to advanced VLA systems
+- **AI Tutor Chatbot** - Get instant answers to robotics questions
+- **Smart Responses** - Tailored explanations for Physical AI topics
+
+### 🧪 Interactive Lab
+- **Forward Kinematics Visualizer** - Real-time 2-link robot arm simulation
+- Adjustable joint angles with live end-effector position updates
+- Visual feedback with color-coded joints and links
+
+### 💡 Covered Topics
+1. **Introduction to Physical AI** - Fundamentals and applications
+2. **ROS 2 Fundamentals** - Nodes, topics, services, DDS
+3. **Simulation Environments** - Gazebo, Isaac Sim
+4. **NVIDIA Isaac Platform** - GPU-accelerated robotics
+5. **Vision-Language-Action Systems** - RT-1, RT-2, PaLM-E
 
 ## 🛠️ Tech Stack
-- **Frontend:** Next.js 14, TypeScript, Tailwind CSS, Web Speech API
-- **Backend:** FastAPI, Python
-- **Development:** Spec-Kit Plus methodology
+
+**Frontend:** Next.js 14, React 18, TypeScript, Tailwind CSS
+**Backend:** FastAPI, Python 3.12
 
 ## 🚀 Quick Start
-
-### Backend
 ```bash
+# Frontend
+cd frontend
+npm install && npm run dev
+
+# Backend
 cd backend
 pip install -r requirements.txt
-python -m uvicorn src.api.main:app --reload --port 8000
+uvicorn src.api.main:app --reload
 ```
-
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Visit: http://localhost:3000
-
-## 📖 Modules
-1. **Introduction to Physical AI** - Fundamentals and applications
-2. **ROS 2 Fundamentals** - Robot Operating System architecture
-3. **Simulation Environments** - Gazebo and Isaac Sim
-4. **NVIDIA Isaac Platform** - Advanced robot development
-5. **Vision-Language-Action Systems** - Multimodal AI for robotics
-
-## 🎯 Hackathon Requirements Met
-- ✅ Interactive textbook with 5+ modules
-- ✅ AI chatbot assistant
-- ✅ Voice interaction mode
-- ✅ Professional UI/UX
-- ✅ Spec-first development (Spec-Kit Plus)
 
 ## 👨‍💻 Author
-Asadullah Shafique - Panaversity Hackathon 2025
 
-## 📄 License
-Educational project for hackathon submission
+**Asadullah Shafique**
+GitHub: [@asadullah48](https://github.com/asadullah48)
 
-## 📹 Demo Video
-[Watch Demo Video](https://youtu.be/XzH21y6hLjs)
+---
 
+**Built for Panaversity Physical AI Hackathon** 🏆
